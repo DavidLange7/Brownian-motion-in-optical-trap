@@ -42,7 +42,7 @@ def r_new_oscill(x_0, k_x, gamma, D, delta_t, t, a):
     
     phi = gamma/(1*10**(-6))
     
-    f = (1/phi)*10**(-3)
+    f = (1/phi)*10**(6)
 
     force_custom = -1/gamma*k_x*delta_t*(x_0 - a*np.sin(2*np.pi*f*t))
 
@@ -285,31 +285,39 @@ plt.savefig('fig6_c.pdf', dpi=500, bbox_inches='tight')
 
 #%%
 
-x_0 = 0
 
-delta_t = 10**(-3) #seconds
-k = 1.5 * 10**(-6) #N/m
+delta_t = 10**(-5) #seconds
+k = 7 * 10**(-6) #N/m
 
-steps = 30000
+steps = 100000
 
-traj_x = [x_0]
-
-for j in range(1, steps):
-    if j % 10000 == 0:
-        print(j)
-
-    tmp = r_new_oscill(x_0, k, gamma, D, delta_t, j*delta_t, 2*10**(-6))
-    traj_x.append(tmp)
+var_s = []
+kspace = np.linspace(3.5,20,30)*10**(-6) #N/m
+for i in range(len(kspace)):
+    
+    k = kspace[i]
+    x_0 = 0
+    traj_x = [x_0]
 
     
-    x_0 = traj_x[j]
+    for j in range(1, steps):
+
     
-traj_x = np.array(traj_x)*10**9
-space = np.linspace(0, steps*delta_t, steps)
+        tmp = r_new_oscill(x_0, k, gamma, D, delta_t, j*delta_t, 100*10**(-9))
+        traj_x.append(tmp)
+    
+        
+        x_0 = traj_x[j]
+        
+    traj_x = np.array(traj_x)*10**9
+    var_s.append(np.var(traj_x))
+    
+plt.plot(kspace*10**(6), var_s, linewidth=3)
+plt.plot(kspace*10**(6), var_s, 'ro')
+plt.xlim([0,20])
+plt.xlabel('k [fN/nm]')
+plt.ylabel(r'$\mathrm{\sigma^2\: [nm^2]}$')
+plt.savefig('fig6_e.pdf', dpi=500, bbox_inches='tight')
 
-ny, binsy, patchesy = plt.hist((traj_x), bins = 200, histtype='bar',density=True, stacked=True, alpha = 0.8, label = r'k = $1.5\cdot 10^{-6}$ N/m')
-plt.legend()
-plt.xlabel('x [nm]')
-plt.ylabel('Intensity [a.u.]')
 
-#plt.savefig('fig6_d.pdf', dpi=500, bbox_inches='tight')
+
